@@ -1,6 +1,7 @@
 #include <cinttypes>
+#include <string>
 
-typedef struct
+struct NFC_IdentificationBlock
 {
 	uint8_t id[2];
 	uint8_t char_variant;
@@ -8,7 +9,7 @@ typedef struct
 	uint8_t model_no[2];
 	uint8_t figure_type;
 	uint8_t pad[0x2F];
-}NFC_IdentificationBlock;
+};
 
 typedef struct{
 	uint16_t id_offset_size;/// "uint16_t size/offset of the below ID data. Normally this is 0x7. When this is <=10, this field is the size of the below ID data. When this is >10, this is the offset of the 10-byte ID data, relative to structstart+4+<offsetfield-10>. It's unknown in what cases this 10-byte ID data is used."

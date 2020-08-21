@@ -1,7 +1,6 @@
 #include "communicator.h"
 #include <fstream>
 #include <iostream>
-#include "bswap.h"
 #define SA struct sockaddr
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
@@ -49,7 +48,7 @@ int Communicator::ParseEncryptedFile()
    if(m_encrypteddata[0xC] != 0xF1 && m_encrypteddata[0xD] != 0x10) // signature fail
       return -1;
    memcpy((uint8_t*)&m_taginfo.id[0], (uint8_t*)&m_encrypteddata[0], 7);
-   memcpy((uint8_t*)&m_identityblock, (uint8_t*)&m_encrypteddata[0x54], 7);
+   memcpy((uint8_t*)&m_identityblock, (uint8_t*)&m_encrypteddata[0x54], 8);
    return 0;
 }
 
@@ -154,9 +153,19 @@ void Communicator::IPCServer()
       if(res == SOCKET_ERROR) break;
       uint32_t *cmdbuf = (uint32_t*)buff;
       uint16_t cmdid = cmdbuf[0] >> 16;
-      debug("Cmdid recieved\n");
+      printf("Cmdid recieved %08X\n", cmdbuf[0]);
       switch(cmdid)
       {
+         case 1:
+         case 2:
+         case 3:
+         case 4:
+         {
+            cmdbuf[0] = IPC_MakeHeader(cmdid, 1, 0);
+            cmdbuf[1] = 0;
+            break;
+         }
+
          case 5: // StartTagScanning
          {
             m_tagstate = NFC_TagState_Scanning;
@@ -194,6 +203,11 @@ void Communicator::IPCServer()
             cmdbuf[0] = IPC_MakeHeader(cmdid, 1, 0);
             cmdbuf[1] = 0;
             break;
+         }
+
+         case 0xB: // GetTagInRangeEvent
+         {
+
          }
 
          case 0xD: // GetTagState
@@ -234,14 +248,14 @@ void Communicator::IPCServer()
                   cmdbuf[1] = 0;
                else
                {
-                  debug("0x13 AppID was incorrect\n");
+                  printf("0x13 AppID was incorrect\n");
                   cmdbuf[1] = 0xC8A17638; // AppId incorrect
                }				
             }
             else
             {
                cmdbuf[1] = 0xC8A17620; // Not Initialized
-               debug("0x13 Not Initialized\n");
+               printf("0x13 Not Initialized\n");
             }
             cmdbuf[0] = IPC_MakeHeader(cmdid, 1, 0);
             break;
@@ -306,7 +320,7 @@ void Communicator::IPCServer()
             if (!(m_plaindata.flag & 0x10)) 
             {
                memset(&m_plaindata.settings, 0, sizeof(m_plaindata.settings));
-               debug ("0x17 UNINITITIALIZED\n");
+               printf("0x17 UNINITITIALIZED\n");
                cmdbuf[1] = 0xC8A17628; //uninitialised
             } 
             else 
@@ -319,7 +333,7 @@ void Communicator::IPCServer()
 
          case 0x18: // GetAmiiboConfig
          {
-            debug("Cmdid 0x18 recieved");
+            printf("Cmdid 0x18 recieved");
             NFC_AmiiboConfig config;
             config.lastwritedate.year = m_plaindata.lastwritedate.year;
             config.lastwritedate.month = m_plaindata.lastwritedate.month;
@@ -431,5 +445,5 @@ void Communicator::IPCServer()
       }
       send(m_sockfd, (char*)cmdbuf, 256, 0);
    }
-   debug("Disconnected\n");
+   printf("Disconnected\n");
 }

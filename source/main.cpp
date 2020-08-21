@@ -9,16 +9,11 @@
 #include <thread>
 #include <functional>
 #include "communicator.h"
-
-void debug(nana::textbox *box, std::string str)
-{
-   box->append(str, false);
-}
+#include "AmiiboUtil.h"
 
 void start(Communicator *comm, nana::form *fm, nana::textbox *box)
 {
-   std::function<void(std::string)> debugfn = std::bind(debug, box, std::placeholders::_1);
-
+   AmiiboUtil util;
    auto error = [](nana::form *fm, std::string message) -> void {
       nana::msgbox m(*fm, "Error");
       m.icon(m.icon_error);
@@ -26,28 +21,30 @@ void start(Communicator *comm, nana::form *fm, nana::textbox *box)
       auto response = m();
    };
 
-   comm->SetDebugFunction(debugfn);
-   debugfn("Reading Files.\n");
+   printf("Reading Files.\n");
    if(comm->ReadFiles() != 0)
    {
       error(fm, "An Error occured while reading files");
       return;
    }
 
-   debugfn("Files parsed successfully.\n");
+   printf("Files parsed successfully.\n");
    if(comm->ParseFiles() != 0)
    {
       error(fm, "Files are invalid");
       return;
    }
 
-   debugfn("Connecting to 3DS.\n");
+   box->append("Figurine: " + util.GetNameForID(comm->GetAmiiboID()), false);
+
+   printf("Connecting to 3DS.\n");
    if(comm->ConnectTo3DS() != 0)
    {
       error(fm, "Could not connect to 3DS, check IP Address and the internet connection.");
       return;
    }
-   debugfn("Connected.\n");
+   
+   printf("Connected.\n");
    comm->IPCServer();
    comm->FlushToFileIfRequired();
 }
@@ -56,9 +53,10 @@ int main()
 {
    using namespace nana;
    Communicator comm;
-   form fm {API::make_center(300, 400), appearance{true, true, false, false, true, false, false}};
+   AmiiboUtil webutil;
+   form fm {API::make_center(300, 200), appearance{true, true, false, false, true, false, false}};
    nana::filebox picker{nullptr, true};
-   fm.caption("Wummibo");     
+   fm.caption("Wumiibo");     
 
    label enc_label{fm, rectangle{10, 10, 110, 30}}; // pos x:y:width:height
    label dec_label{fm, rectangle{10, 40, 110, 30}};
@@ -70,7 +68,7 @@ int main()
    textbox enc_loc {fm, rectangle{100, 4, 150, 25}, true};
    textbox dec_loc {fm, rectangle{100, 34, 150, 25}, true};
    textbox ip_loc  {fm, rectangle{100, 64, 150, 25}, true};
-   textbox debug_loc {fm, rectangle{10, 160, 280, 200}, true};
+   textbox debug_loc {fm, rectangle{10, 160, 280, 30}, true};
    enc_loc.editable(false);
    dec_loc.editable(false);
    debug_loc.editable(false);

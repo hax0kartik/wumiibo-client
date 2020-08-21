@@ -2,6 +2,7 @@
 #include <cinttypes>
 #include <functional>
 #include "amiibo_structs.h"
+#include "bswap.h"
 class Communicator
 {
     public:
@@ -12,12 +13,6 @@ class Communicator
         void SetEncryptedFile(const std::string filename) {
             m_encryptedfile = filename;
         };
-
-        void SetDebugFunction(std::function<void(std::string)> _debug)
-        {
-            debug = _debug;
-            debug("Debug function attached\n");
-        }
 
         void SetIPAddr(const std::string addr){
             m_addr = addr;
@@ -30,6 +25,13 @@ class Communicator
         const std::string &GetDecryptedFile() {
             return m_decryptedfile;
         };
+
+        uint64_t GetAmiiboID() {
+            uint64_t val;
+            memcpy(&val, &m_identityblock, 8);
+            val = bswap_64(val);
+            return val;
+        }
         
         int ReadFiles();
         int ParseFiles();
@@ -54,6 +56,5 @@ class Communicator
 
         int m_sockfd;
         uint8_t m_tagstate = NFC_TagState_ScanningStopped;
-        std::function<void(std::string)> debug;
         bool m_flush;
 };
