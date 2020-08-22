@@ -213,6 +213,7 @@ void Communicator::IPCServer()
          case 0xD: // GetTagState
          {
             cmdbuf[2] = m_tagstate;
+            printf("TagState %d\n", m_tagstate);
             if(m_tagstate == NFC_TagState_Scanning) m_tagstate = NFC_TagState_InRange;
             cmdbuf[0] = IPC_MakeHeader(cmdid, 2, 0);
             cmdbuf[1] = 0;
@@ -282,7 +283,7 @@ void Communicator::IPCServer()
             break;
          }
 
-         case 0x15:
+         case 0x15: //GetAppdata
          {
             //uint32_t size = cmdbuf[2];
             cmdbuf[0] = IPC_MakeHeader(cmdid, 1, 2);

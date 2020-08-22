@@ -110,6 +110,8 @@ int main()
        });
 
    emulate.events().click([&]() {
+                     debug_loc.select(true);
+                     debug_loc.del();
                      std::thread(start, &comm, &fm, &debug_loc).detach();
           });
 
