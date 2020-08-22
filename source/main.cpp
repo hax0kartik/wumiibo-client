@@ -86,6 +86,8 @@ int main()
    enc_button.events().click([&]() {
                      auto paths = picker.show();
                      if(!paths.empty()){
+                           enc_loc.select(true);
+                           enc_loc.del();
                            enc_loc.append(paths[0].filename(), true);
                            comm.SetEncryptedFile(paths[0].u8string());
                      }
@@ -94,6 +96,8 @@ int main()
    dec_button.events().click([&]() {
                      auto paths = picker.show();
                      if(!paths.empty()){
+                           dec_loc.select(true);
+                           dec_loc.del();
                            dec_loc.append(paths[0].filename(), true);
                            comm.SetDecryptedFile(paths[0].u8string());
                      }
