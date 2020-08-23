@@ -212,6 +212,11 @@ void Communicator::IPCServer()
 
          case 0xD: // GetTagState
          {
+            if(cmdbuf[1] == 1)
+            {
+               printf("TagState changed by module\n");
+               m_tagstate = cmdbuf[2];
+            }
             cmdbuf[2] = m_tagstate;
             printf("TagState %d\n", m_tagstate);
             if(m_tagstate == NFC_TagState_Scanning) m_tagstate = NFC_TagState_InRange;
