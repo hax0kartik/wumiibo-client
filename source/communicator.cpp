@@ -144,6 +144,13 @@ int Communicator::ConnectTo3DS()
    return 0; 
 }
 
+void Communicator::DisconnectFrom3DS()
+{
+   closesocket(m_sockfd);
+   m_sockfd = -1;
+   WSACleanup();
+}
+
 void Communicator::IPCServer()
 {
    uint8_t buff[256]; 
@@ -205,9 +212,16 @@ void Communicator::IPCServer()
             break;
          }
 
-         case 0xB: // GetTagInRangeEvent
+         case 0xB: // TagInRangeEvent
          {
+            printf("GetTagInRangeEvent\n");
+            break;
+         }
 
+         case 0xC: /// TagOutOfRangeEvent
+         {
+            printf("TagOutOfRangeEvent\n");
+            break;
          }
 
          case 0xD: // GetTagState

@@ -32,7 +32,12 @@ class Communicator
             val = bswap_64(val);
             return val;
         }
+
+        bool Is3DSConnected() {
+            return m_sockfd != -1 ? true : false;
+        }
         
+        void DisconnectFrom3DS();
         int ReadFiles();
         int ParseFiles();
         void FlushToFileIfRequired();
@@ -54,7 +59,7 @@ class Communicator
         NFC_IdentificationBlock m_identityblock;
         NFC_TagInfo m_taginfo;
 
-        int m_sockfd;
-        uint8_t m_tagstate = NFC_TagState_ScanningStopped;
+        int m_sockfd = -1;
+        uint8_t m_tagstate = NFC_TagState_ScanningStopped; // By default we should send the state as tag in range
         bool m_flush;
 };

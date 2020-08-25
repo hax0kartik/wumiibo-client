@@ -110,10 +110,18 @@ int main()
        });
 
    emulate.events().click([&]() {
-                     debug_loc.select(true);
-                     debug_loc.del();
-                     std::thread(start, &comm, &fm, &debug_loc).detach();
-          });
+                     if(comm.Is3DSConnected()) {
+                        comm.DisconnectFrom3DS();
+                        emulate.caption("Emulate");
+                     }
+                     else
+                     {
+                        debug_loc.select(true);
+                        debug_loc.del();
+                        std::thread(start, &comm, &fm, &debug_loc).detach();
+                        emulate.caption("Stop");
+                     } 
+                  });
 
    // fm_place.collocate();                      // and collocate all in place
    fm.show();
